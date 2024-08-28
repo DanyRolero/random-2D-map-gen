@@ -14,6 +14,5 @@ let genBinaryCollection = function(numInt) {
 let drawGShape2DInCanvas = function(gShape2D) {
     const widthCell = canvas.width / gShape2D.width;
     const heightCell = canvas.height / gShape2D.height;
-
-
 }
+
