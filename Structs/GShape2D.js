@@ -49,25 +49,25 @@ class GShape2D {
     }
 
     // --------------------------------------------------------------------------------------
-    hasCellAdjacent(x, y, direction) {
+    hasAdjacent(x, y, direction) {
         if(direction == 'up') {
             if(y == 0) return false;
             return this.cells[x][y-1];
         }
 
-        if(direction == 'up') {
-            if(y == 0) return false;
-            return this.cells[x][y-1];
+        if(direction == 'bottom') {
+            if(y == this.height-1) return false;
+            return this.cells[x][y+1];
         }
 
-        if(direction == 'up') {
-            if(y == 0) return false;
-            return this.cells[x][y-1];
+        if(direction == 'left') {
+            if(x == 0) return false;
+            return this.cells[x-1][y];
         }
 
-        if(direction == 'up') {
-            if(y == 0) return false;
-            return this.cells[x][y-1];
+        if(direction == 'right') {
+            if(x == this.width-1) return false;
+            return this.cells[x+1][y];
         }
 
     }
