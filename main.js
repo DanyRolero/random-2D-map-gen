@@ -53,12 +53,13 @@ function drawGridInCanvas() {
 //drawCells(2, 3, '111010');
 //drawGridInCanvas();
 
-var gs = new GShape2D(2,2, '1110');
+var gs = new GShape2D(2,2);
+gs.activateCell(1,1);
 console.log(gs.getLength());
 console.log(gs.getSize());
 console.log(gs.getCellFromIndex(3));
 console.log(gs.getCellFromVector(1,1));
-console.log(gs.hasUpNeightborFromIndex(2));
-console.log(gs.hasBottomNeightborFromIndex(2));
-console.log(gs.hasRightNeightborFromIndex(2));
-console.log(gs.hasLeftNeightborFromIndex(2));
+//console.log(gs.hasUpNeightborFromIndex(2));
+//console.log(gs.hasBottomNeightborFromIndex(2));
+//console.log(gs.hasRightNeightborFromIndex(2));
+//console.log(gs.hasLeftNeightborFromIndex(2));

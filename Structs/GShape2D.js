@@ -1,57 +1,74 @@
 class GShape2D {
-    constructor(width, height, bin) {
+    constructor(width, height) {
         this.width = width;
         this.height = height;
-        this.cells = bin;
-    }
+        this.cells = [];
 
-    // --------------------------------------------------------------------------------------
-    getLength() {
-        return this.cells.length;
-    }
-
-    // --------------------------------------------------------------------------------------
-    getSize() {
-        let size = 0;
-
-        for(let i = 0; i < this.getLength(); i++) {
-            if(this.cells.charAt(i) == '1') size++;
+        for(let i = 0; i < height; i++) {
+            this.cells.push(new Array(height).fill(false));
         }
-
-        return size;
     }
+
+    // --------------------------------------------------------------------------------------
+    // Recorre la cuadrícula y ejecuta una función de callback para cada elemento
+    _traverseGrid(callback) {
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                callback(this.cells[x][y]);
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------------------
+    getLength() {
+        let result = 0;
+        this._traverseGrid((value) => {
+            if(value) result++;
+        });
+        return result;
+    }
+
+     // ------------------------------------------------------------------------------------
+     getSize() {
+        return this.width * this.height;
+     }
 
     // --------------------------------------------------------------------------------------
     getCellFromIndex(index) {
-        return this.cells.charAt(index);
+        return this.cells.flat()[index];
     }
 
     // --------------------------------------------------------------------------------------
     getCellFromVector(x, y) {
-        return this.cells.charAt(y * this.width + x);
+        return this.cells[x][y];
     }
 
     // --------------------------------------------------------------------------------------
-    hasUpNeightborFromIndex(index) {
-        if(index < this.width) return false;
-        return Boolean(Number(this.cells.charAt(index - this.width)));
+    activateCell(x,y) {
+        this.cells[x][y] = true;
     }
 
     // --------------------------------------------------------------------------------------
-    hasBottomNeightborFromIndex(index) {
-        if(index >= this.getLength() - this.width) return false;
-        return Boolean(Number(this.cells.charAt(index + this.width)));
-    }
+    hasCellAdjacent(x, y, direction) {
+        if(direction == 'up') {
+            if(y == 0) return false;
+            return this.cells[x][y-1];
+        }
 
-    // --------------------------------------------------------------------------------------
-    hasLeftNeightborFromIndex(index) {
-        if(index % this.width == 0) return false;
-        return Boolean(Number(this.cells.charAt(index - 1)));
-    }
+        if(direction == 'up') {
+            if(y == 0) return false;
+            return this.cells[x][y-1];
+        }
 
-    // --------------------------------------------------------------------------------------
-    hasRightNeightborFromIndex(index) {
-        if(index % this.width == 1) return false;
-        return Boolean(Number(this.cells.charAt(index + 1)));
+        if(direction == 'up') {
+            if(y == 0) return false;
+            return this.cells[x][y-1];
+        }
+
+        if(direction == 'up') {
+            if(y == 0) return false;
+            return this.cells[x][y-1];
+        }
+
     }
 }

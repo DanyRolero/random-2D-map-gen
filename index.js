@@ -3,6 +3,7 @@ var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
 
 
+/*
 let genBinaryCollection = function(numInt) {
     const totalCombinations = Math.pow(2,numInt);
     const binaryCollection = [];
@@ -16,3 +17,6 @@ let drawGShape2DInCanvas = function(gShape2D) {
     const heightCell = canvas.height / gShape2D.height;
 }
 
+*/
+
+// --------------------------------------------------------------------------------------
