@@ -76,7 +76,5 @@ function assertTrue(func, ...args) {
 
 let test = new Tester();
 test.assertTrue('gShape2D.getSize()', gs.getSize());
-console.log(test.messages[0]);
 
-let error = new Error('No se puede hacer!');
-error.name = 'ActionDenied';
+

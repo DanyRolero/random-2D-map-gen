@@ -29,89 +29,68 @@
 
 class Tester {
     testStarted = false;
-    testList = [];
-    messages = [];
+    unitTestList = [];
     counter = 0;
-
-    static setColor = {
-        red: "\x1b[31m",
-        green: "\x1b[32m",
-        reset: "\x1b[0m",
-    };
 
     constructor(nameTester) {
         this.name = nameTester;
     }
 
     //-----------------------------------------------------------------------------
+    /* startTesting(testName)
+        - Se prepara un mensaje de inicio de testing
+            - Encabezado con el nombre del Tester inicializado.
+
+        - Se recorren todos los miembros del objeto
+            - Si el miembro es de tipo función y se llama igual que testName
+            -> Se prepara el encabezado del test unitario
+
+    */
+
+    //-----------------------------------------------------------------------------
     assertTrue(label, actual) {
-        let result = actual === true;
-        let message = '';
-        message += (result)? this._greenMessage('[PASS] ') : this._redMessage('[FAIL] ');
-        message += label;
-        message += ' => ';
-        message += result? this._greenMessage(actual) : this._redMessage(actual);
-        message += ' expected' + this._greenMessage(' true');
-        console.log(message);
-        
+        this._assert(label, actual, true);
     }
 
     //-----------------------------------------------------------------------------
     assertFalse(label, actual) {
-        let result = actual === false;
-        let message = '';
-        message += (result)? this._greenMessage('[PASS] ') : this._redMessage('[FAIL] ');
-        message += label;
-        message += ' => ';
-        message += result? this._greenMessage(actual) : this._redMessage(actual);
-        message += ' expected' + this._greenMessage(' false');
-        
-        console.log(message);
+        this._assert(label, actual, false);
     }
 
     //-----------------------------------------------------------------------------
     assertEqual(label, actual, expected) { 
-        let result = actual === expected;
-        let message = '';
-        message += (result)? this._greenMessage('[PASS] ') : this._redMessage('[FAIL] ');
-        message += label;
-        message += ' => ';
-        message += result? this._greenMessage(actual) : this._redMessage(actual);
-        message += ' expected' + this._greenMessage(' ' + expected);
-
-        console.log(message);
+        this._assert(label, actual, expected);
     }
 
     //-----------------------------------------------------------------------------
     assertError(label, errorExpected, func, ...args) { 
-        let result;
         let actual;
-        let expected = errorExpected.name;
-        let message = '';
+        let expected = errorExpected.constructor.name + ' => ' + errorExpected.name + ': ' + errorExpected.message.slice(0,20) + '...';
 
         try {
             func(...args);
-            result = false;
             actual = 'No throw Error';
         }
 
         catch(error) {
-            actual = error.name;
-            result = (error instanceof errorExpected && error.message === errorExpected.message);
+            actual = error.constructor.name + ' => ' + error.name + ': ' + error.message.slice(0,20) + '...';
         }
 
+        this._assert(label, actual, expected);
+        
+    }
+
+   //-----------------------------------------------------------------------------
+    _assert(label, actual, expected) {
+        let result = actual === expected;
+
+        let message = '';
         message += (result)? this._greenMessage('[PASS] ') : this._redMessage('[FAIL] ');
         message += label;
         message += ' => ';
         message += result? this._greenMessage(actual) : this._redMessage(actual);
-        message += ' expected' + this._greenMessage(' ' + expected);
-
-        console.log(message);
-        
-    }
-
-    _assert(label, actual, expected) {
-
+        message += ' expected' + this._greenMessage(expected);
+        return message;
     }
 
     //-----------------------------------------------------------------------------
@@ -136,4 +115,20 @@ class Tester {
     _redMessage(message) {
         return '\x1b[31m' + message + '\x1b[0m';
     }
+}
+
+
+//-----------------------------------------------------------------------------
+class TestCheck {
+    constructor(result, message) {
+        this.result = result;
+        this.message = message;
+    }
+}
+
+class UnitTest {
+    checkList = [];
+    
+
+    get
 }
