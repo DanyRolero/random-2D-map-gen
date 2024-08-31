@@ -54,12 +54,29 @@ function drawGridInCanvas() {
 //drawGridInCanvas();
 
 var gs = new GShape2D(2,2);
-gs.activateCell(1,1);
-console.log(gs.getLength());
-console.log(gs.getSize());
-console.log(gs.getCellFromIndex(3));
-console.log(gs.getCellFromVector(1,1));
+//gs.activateCell(1,1);
+//console.log(gs.getLength());
+//console.log(gs.getSize());
+//console.log(gs.getCellFromIndex(3));
+//console.log(gs.getCellFromVector(1,1));
 //console.log(gs.hasUpNeightborFromIndex(2));
 //console.log(gs.hasBottomNeightborFromIndex(2));
 //console.log(gs.hasRightNeightborFromIndex(2));
 //console.log(gs.hasLeftNeightborFromIndex(2));
+
+function f() {
+    if(arguments.length > 0) return true;
+    return false;
+}
+
+function assertTrue(func, ...args) {
+    console.log(func(...args));
+    //console.log(func.name + '(' + args + ') =>')
+}
+
+let test = new Tester();
+test.assertTrue('gShape2D.getSize()', gs.getSize());
+console.log(test.messages[0]);
+
+let error = new Error('No se puede hacer!');
+error.name = 'ActionDenied';

@@ -1,4 +1,6 @@
 class GShape2D {
+
+    static ExampleError
     constructor(width, height) {
         this.width = width;
         this.height = height;
