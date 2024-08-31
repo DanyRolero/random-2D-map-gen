@@ -30,7 +30,7 @@
 class Tester {
     testStarted = false;
     unitTestList = [];
-    counter = 0;
+    currentTestId = 0;
 
     constructor(nameTester) {
         this.name = nameTester;
@@ -38,12 +38,12 @@ class Tester {
 
     //-----------------------------------------------------------------------------
     /* startTesting(testName)
+        - Si el el valor pasado no comienza por test -> Error 'El nombre de los métodos test deben comenzar por test'
+
         - Se prepara un mensaje de inicio de testing
             - Encabezado con el nombre del Tester inicializado.
 
-        - Se recorren todos los miembros del objeto
-            - Si el miembro es de tipo función y se llama igual que testName
-            -> Se prepara el encabezado del test unitario
+        - Se llama a this.testName()
 
     */
 
@@ -59,13 +59,13 @@ class Tester {
 
     //-----------------------------------------------------------------------------
     assertEqual(label, actual, expected) { 
-        this._assert(label, actual, expected);
+       this._assert(label, actual, expected);
     }
 
     //-----------------------------------------------------------------------------
     assertError(label, errorExpected, func, ...args) { 
         let actual;
-        let expected = errorExpected.constructor.name + ' => ' + errorExpected.name + ': ' + errorExpected.message.slice(0,20) + '...';
+        let expected = errorExpected.constructor.name + ' => ' + errorExpected.name + ': ' + errorExpected.message;
 
         try {
             func(...args);
@@ -73,11 +73,10 @@ class Tester {
         }
 
         catch(error) {
-            actual = error.constructor.name + ' => ' + error.name + ': ' + error.message.slice(0,20) + '...';
+            actual = error.constructor.name + ' => ' + error.name + ': ' + error.message;
         }
 
         this._assert(label, actual, expected);
-        
     }
 
    //-----------------------------------------------------------------------------
@@ -90,7 +89,8 @@ class Tester {
         message += ' => ';
         message += result? this._greenMessage(actual) : this._redMessage(actual);
         message += ' expected' + this._greenMessage(expected);
-        return message;
+
+        this.unitTestList[this.currentTestId].addCheck(new TestCheck(result, message));
     }
 
     //-----------------------------------------------------------------------------
@@ -118,7 +118,7 @@ class Tester {
 }
 
 
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
 class TestCheck {
     constructor(result, message) {
         this.result = result;
@@ -126,9 +126,12 @@ class TestCheck {
     }
 }
 
+//---------------------------------------------------------------------------------
 class UnitTest {
     checkList = [];
-    
 
-    get
+    //-----------------------------------------------------------------------------
+    addCheck(check) {
+        this.checkList.push(check);
+    }
 }
