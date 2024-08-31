@@ -37,14 +37,20 @@ class Tester {
     }
 
     //-----------------------------------------------------------------------------
-    /* startTesting(testName)
+    /* startTest(testName)
         - Si el el valor pasado no comienza por test -> Error 'El nombre de los métodos test deben comenzar por test'
+        - Si el tester no tiene ningún test con ese nombre
 
         - Se prepara un mensaje de inicio de testing
             - Encabezado con el nombre del Tester inicializado.
 
         - Se llama a this.testName()
 
+    */
+
+    /* startAllTest() {
+    
+    }    
     */
 
     //-----------------------------------------------------------------------------
