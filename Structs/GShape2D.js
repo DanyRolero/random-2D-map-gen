@@ -1,12 +1,11 @@
 class GShape2D {
-
-    static ExampleError
+    
     constructor(width, height) {
         this.width = width;
         this.height = height;
         this.cells = [];
 
-        for(let i = 0; i < height; i++) {
+        for(let i = 0; i < width; i++) {
             this.cells.push(new Array(height).fill(false));
         }
     }
@@ -30,8 +29,8 @@ class GShape2D {
         return result;
     }
 
-     // ------------------------------------------------------------------------------------
-     getSize() {
+    // ------------------------------------------------------------------------------------
+    getSize() {
         return this.width * this.height;
      }
 
@@ -51,26 +50,26 @@ class GShape2D {
     }
 
     // --------------------------------------------------------------------------------------
-    hasAdjacent(x, y, direction) {
-        if(direction == 'up') {
-            if(y == 0) return false;
-            return this.cells[x][y-1];
-        }
+    hasTopAdjacent(x, y) {
+        if(y == 0) return false;
+        return this.cells[x][y-1];
+    }
 
-        if(direction == 'bottom') {
-            if(y == this.height-1) return false;
-            return this.cells[x][y+1];
-        }
+    // --------------------------------------------------------------------------------------
+    hasBottomAdjacent(x, y) {
+        if(y == this.height-1) return false;
+        return this.cells[x][y+1];
+    }
 
-        if(direction == 'left') {
-            if(x == 0) return false;
-            return this.cells[x-1][y];
-        }
+    // --------------------------------------------------------------------------------------
+    hasLeftAdjacent(x, y) {
+        if(x == 0) return false;
+        return this.cells[x-1][y];
+    }
 
-        if(direction == 'right') {
-            if(x == this.width-1) return false;
-            return this.cells[x+1][y];
-        }
-
+    // --------------------------------------------------------------------------------------
+    hasRightAdjacent(x, y) {
+        if(x == this.width-1) return false;
+        return this.cells[x+1][y];
     }
 }

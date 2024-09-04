@@ -1,143 +1,316 @@
-/*
-- Clase abstracta Tester
-    - Contiene metodos de testeo, assert
-    - Nombre
-    - Contador para contabilizar cuantos test se han ejecutado, que porcentaje de test han sido exitosos.
-    - Metodos para dirigir gestionar y dirigir los test.
-    - Metodos para crear registros y estadisticas.
-
-- Clase que hereda de Tester
-    - Se añaden nuevas funciones de test para probar conjuntos de checks.
-
-- Concepto de test
-    - Se debe indicar su inicio con el método startTest(testName)
-    - Se debe indicar su final endTest()
-    - Nombre del test
-    - Es un conjunto de checks
-    - Es un método definido en la clase que extiende 
-
-- Concepto de check
-    - Son los métodos assert de la clase Tester <- label, actual, expected,
-
-
-- Caso de uso
-    1. Creo un nuevo archivo de clase que extiende a la clase Tester
-    2. Creo métodos de test
-*/
-
 "use strict";
 
+//---------------------------------------------------------------------------------
+// CLASS TESTER
+//---------------------------------------------------------------------------------
 class Tester {
-    testStarted = false;
-    unitTestList = [];
-    currentTestId = 0;
 
-    constructor(nameTester) {
-        this.name = nameTester;
-    }
-
-    //-----------------------------------------------------------------------------
-    /* startTest(testName)
-        - Si el el valor pasado no comienza por test -> Error 'El nombre de los métodos test deben comenzar por test'
-        - Si el tester no tiene ningún test con ese nombre
-
-        - Se prepara un mensaje de inicio de testing
-            - Encabezado con el nombre del Tester inicializado.
-
-        - Se llama a this.testName()
-
-    */
-
-    /* startAllTest() {
+    _unitTestList = [];
+    _messageWriter = new TesterMessageWriter(this);
+    _testOutputHandler = new TestOutputHandler(this._messageWriter);
     
-    }    
-    */
-
     //-----------------------------------------------------------------------------
-    assertTrue(label, actual) {
+    // 2. ASSERT METHODS
+    //-----------------------------------------------------------------------------
+    _assertTrue(label, actual) {
         this._assert(label, actual, true);
     }
-
+    
     //-----------------------------------------------------------------------------
-    assertFalse(label, actual) {
+    _assertFalse(label, actual) {
         this._assert(label, actual, false);
     }
-
+    
     //-----------------------------------------------------------------------------
-    assertEqual(label, actual, expected) { 
-       this._assert(label, actual, expected);
+    _assertEqual(label, actual, expected) {
+        this._assert(label, actual, expected);
     }
-
+    
     //-----------------------------------------------------------------------------
-    assertError(label, errorExpected, func, ...args) { 
+    _assertError(label, errorExpected, func, ...args) {
         let actual;
-        let expected = errorExpected.constructor.name + ' => ' + errorExpected.name + ': ' + errorExpected.message;
-
+        let expected = this._comparableErrorString(errorExpected);
+        
         try {
             func(...args);
-            actual = 'No throw Error';
+            actual = "No Error Thrown";
+        } catch (error) {
+            actual = this._comparableErrorString(error);
         }
-
-        catch(error) {
-            actual = error.constructor.name + ' => ' + error.name + ': ' + error.message;
-        }
-
+        
         this._assert(label, actual, expected);
     }
 
-   //-----------------------------------------------------------------------------
-    _assert(label, actual, expected) {
-        let result = actual === expected;
+    
+    //-----------------------------------------------------------------------------
+    _assert(label, actual, expected) {    
+        this._currentUnitTest().addCheck(new TestCheck(label, actual, expected));
+    }
 
-        let message = '';
-        message += (result)? this._greenMessage('[PASS] ') : this._redMessage('[FAIL] ');
-        message += label;
-        message += ' => ';
-        message += result? this._greenMessage(actual) : this._redMessage(actual);
-        message += ' expected' + this._greenMessage(expected);
 
-        this.unitTestList[this.currentTestId].addCheck(new TestCheck(result, message));
+
+    //-----------------------------------------------------------------------------
+    // 2. TEST METHODS
+    //-----------------------------------------------------------------------------
+    startTest(testName, details = false) {
+        this._unitTestList = [];
+        this._testOutputHandler.outputHeader();
+
+        let testNamesList = this._getTestMethodNamesList();
+        
+        if(!testNamesList.includes(testName, 0)) {
+            this._testOutputHandler.outputNotTestFound();
+            this._testOutputHandler.outputclose();
+            return;
+        }
+        
+        this._addNewUnitTest(testName);
+        this._resolveTest(testName);
+
+        this._testOutputHandler.outputTestResult(this._currentUnitTest());
+        if(details) this._testOutputHandler.outputAllChecksResults(this._currentUnitTest());
+        this._testOutputHandler.outputclose();
     }
 
     //-----------------------------------------------------------------------------
-    _getSignFuntionMessage(func, ...args) {
-        return func.name + "(" + args + ")";
+    startAllTest(details = false) {
+        this._unitTestList = [];
+        this._testOutputHandler.outputHeader();
+
+        let testNamesList = this._getTestMethodNamesList();
+
+        if(testNamesList.length == 0) {
+            this._testOutputHandler.outputNotTestFound();
+            this._testOutputHandler.outputclose();
+            return;
+        }
+    
+        testNamesList.forEach((test) => { 
+            this._addNewUnitTest(test);
+            this._resolveTest(test);
+            this._testOutputHandler.outputTestResult(this._currentUnitTest());
+            if(details) {
+                this._testOutputHandler.outputAllChecksResults(this._currentUnitTest());
+                this._testOutputHandler.outputBreakLine();
+            }
+        });
+
+        if(details) this._testOutputHandler.outputSummaryTest();
+        this._testOutputHandler.outputclose();
     }
 
     //-----------------------------------------------------------------------------
-    _testHeaderMessage() {
-        let message = ''
-        message += '-----------------------------------------------------------------------------\n';
-        message += 'Starting testing from ' + this.name + '\n'
-        message += '-----------------------------------------------------------------------------\n';
+    getUnitTestList() {
+        return this._unitTestList;
+    }
+
+    
+
+    //-----------------------------------------------------------------------------
+    // AUX METHODS
+    //-----------------------------------------------------------------------------
+    _comparableErrorString(error) {
+        return error.constructor.name + " => " + error.name + ": " + error.message;
+    }
+
+    _getTestMethodNamesList() {
+        return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter((name) => name.startsWith("test"));
+    }
+
+    _currentUnitTest() {
+        return this._unitTestList.at(-1);
+    }
+
+    _addNewUnitTest(testName) {
+        this._unitTestList.push(new UnitTest(testName));
     }
 
     //-----------------------------------------------------------------------------
-    _greenMessage(message) {
-        return '\x1b[32m' + message + '\x1b[0m';
-    }
-
-    //-----------------------------------------------------------------------------
-    _redMessage(message) {
-        return '\x1b[31m' + message + '\x1b[0m';
+    _resolveTest(testName) {
+        this[testName]();
+        this._currentUnitTest().setResult();
     }
 }
-
 
 //---------------------------------------------------------------------------------
+// CLASS TEST CHECK
+//---------------------------------------------------------------------------------
 class TestCheck {
-    constructor(result, message) {
-        this.result = result;
-        this.message = message;
+    constructor(label, actual, expected) {
+        this.label = label;
+        this.actual = actual;
+        this.expected = expected;
+        this.result = (actual === expected);
     }
 }
 
+//---------------------------------------------------------------------------------
+// CLASS UNIT TEST
 //---------------------------------------------------------------------------------
 class UnitTest {
     checkList = [];
+    result = false;
+    
+    constructor(testName) {
+        this.name = testName;
+    }
 
     //-----------------------------------------------------------------------------
     addCheck(check) {
         this.checkList.push(check);
     }
+
+    //-----------------------------------------------------------------------------
+    setResult() {
+        for (let i = 0; i < this.checkList.length; i++) {
+            if (!this.checkList[i].result) {
+                this.result = false;
+                return;
+            }
+        }
+
+        this.result = true;
+    }
+
+}
+
+
+//---------------------------------------------------------------------------------
+//CLASS TEST LOGGER
+//---------------------------------------------------------------------------------
+class TesterMessageWriter {
+    constructor(tester) {
+        this.tester = tester;
+    }
+
+    //-----------------------------------------------------------------------------
+    header() {
+        let message = "";
+        message += "-----------------------------------------------------------------------------\n";
+        message += "Starting testing from " + this.tester.constructor.name + "\n";
+        message += "-----------------------------------------------------------------------------\n";
+        return message;
+    }
+
+    //-----------------------------------------------------------------------------
+    close() {
+        let message = "";
+        message += "-----------------------------------------------------------------------------\n";
+        return message;
+    }
+
+    //-----------------------------------------------------------------------------
+    notTestFound() {
+        return this._redMessage('NOT TEST FOUND');
+    }
+
+    //-----------------------------------------------------------------------------
+    summaryTest() {
+        let amountPassTest = this.tester.getUnitTestList().filter((test) => test.result == true).length;
+
+        let message = "";
+        message += "-----------------------------------------------------------------------------\n";
+        message += 'Test Summary: ';
+        message += amountPassTest;
+        message += '/';
+        message += this.tester.getUnitTestList().length;
+        message += ' TOTAL: ';
+        message += (Math.round(amountPassTest/this.tester.getUnitTestList().length * 100)) + '%\n';
+        message += "-----------------------------------------------------------------------------\n";
+        return this._colorMessage("\x1b[33m" ,message);
+    }
+
+    //-----------------------------------------------------------------------------
+    testResult(unitTest) {
+        let message = unitTest.result
+            ? this._greenMessage("[PASS] ")
+            : this._redMessage("[FAIL] ");
+        message += unitTest.name + "()";
+        return message
+    }
+
+    //-----------------------------------------------------------------------------
+    allChecksResults(unitTest) {
+        let message = '';
+        for (let i = 0; i < unitTest.checkList.length; i++) {
+            message += "\t" + this.checkResult(unitTest.checkList[i]) + '\n';
+        }
+        return message;
+    }
+
+    //-----------------------------------------------------------------------------
+    checkResult(checkTest) {
+        let message = '';
+        message += checkTest.result? this._greenMessage('[PASS] ') : this._redMessage('[FAIL] ')
+        message += checkTest.label + ' => result ' 
+        message += checkTest.result
+            ? this._greenMessage(checkTest.actual)
+            : this._redMessage(checkTest.actual);
+        message += ' expected ';
+        message += this._greenMessage(checkTest.expected);
+        return message;
+    }
+
+    //-----------------------------------------------------------------------------
+    _colorMessage(color, message) {
+        return color + message + "\x1b[0m";
+    }
+
+    //-----------------------------------------------------------------------------
+    _greenMessage(message) {
+        return this._colorMessage("\x1b[32m",  message);
+    }
+
+    //-----------------------------------------------------------------------------
+    _redMessage(message) {
+        return this._colorMessage("\x1b[31m",  message);
+    }
+}
+
+//---------------------------------------------------------------------------------
+//CLASS TestOutputHandler
+//---------------------------------------------------------------------------------
+class TestOutputHandler {
+    constructor(testerMessageWriter) {
+        this.messageWriter = testerMessageWriter;
+    }
+
+    //-----------------------------------------------------------------------------
+    outputHeader() {
+        console.clear();
+        console.time('Time test');
+        console.log(this.messageWriter.header());
+    }
+
+    //-----------------------------------------------------------------------------
+    outputNotTestFound() {
+        console.log(this.messageWriter.notTestFound());
+    }
+
+    //-----------------------------------------------------------------------------
+    outputclose() {
+        console.log(this.messageWriter.close());
+        console.timeEnd('Time test');
+    }
+
+    //-----------------------------------------------------------------------------
+    outputTestResult(unitTest) {
+        console.log(this.messageWriter.testResult(unitTest));
+    }
+
+    //-----------------------------------------------------------------------------
+    outputSummaryTest() {
+        console.log(this.messageWriter.summaryTest());
+    }
+
+    //-----------------------------------------------------------------------------
+    outputAllChecksResults(unitTest) {
+        console.log(this.messageWriter.allChecksResults(unitTest));
+    }
+
+    //-----------------------------------------------------------------------------
+    outputBreakLine() {
+        console.log('\n');
+    }
+
 }
